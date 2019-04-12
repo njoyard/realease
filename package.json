@@ -1,0 +1,15 @@
+{
+  "name": "realease",
+  "version": "1.0.0",
+  "description": "Ease up the releases",
+  "author": "Nicolas Joyard <nicolas@njoyard.fr>",
+  "license": "MIT",
+  "dependencies": {
+    "fs-extra": "^7.0.1",
+    "nodegit": "^0.24.1",
+    "semver": "^6.0.0"
+  },
+  "bin": {
+    "realease": "./cli/realease.js"
+  }
+}
