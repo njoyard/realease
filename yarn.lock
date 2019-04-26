@@ -135,6 +135,11 @@ chownr@^1.0.1, chownr@^1.1.1:
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-1.1.1.tgz#54726b8b8fff4df053c42187e801fb4412df1494"
   integrity sha512-j38EvO5+LHX84jlo6h4UzmOwi0UgW61WRyPtJz4qaadK5eY3BTS5TY/S1Stc3Uk2lIM6TPevAlULiEJwie860g==
 
+cli-argparse@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/cli-argparse/-/cli-argparse-1.1.2.tgz#0a44e1761289b5708755a72a48494c46fcae39b6"
+  integrity sha1-CkThdhKJtXCHVacqSElMRvyuObY=
+
 code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"

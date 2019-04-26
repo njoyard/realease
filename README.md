@@ -24,7 +24,7 @@ Step 5 can be either manual or automated from your CI pipeline.
 Add realease to your project.
 
 ```
-yarn add --dev git@github.com:njoyard/realease
+yarn add --dev git://github.com/njoyard/realease
 ```
 
 Set up your CI to call `realease tag` on merges onto master.  For example in a
@@ -33,11 +33,11 @@ CircleCI configuration file:
 ```yaml
 
 jobs:
-release:
+  release:
     steps:
       - run:
           name: Create release tag if not already present
-          command: `yarn bin`/realease tag
+          command: npx realease tag
 
 workflows:
   version: 2
@@ -48,7 +48,7 @@ workflows:
           requires:
             - test
             - anythingelse
-          filter:
+          filters:
             branches:
               only: master
 ```
