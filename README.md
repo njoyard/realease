@@ -97,7 +97,9 @@ already exists.
 Options:
 * `--force`: do not complain if we're not currently on master
 * `--message <msg>`: tag message, defaults to `Release version {version}`
-* `--no-push`: do not push the tag
+* `--no-push`: do not push the tag.  Ignored when using `--api`.
 * `--remote <name>`: name of remote to push to, defaults to `origin`
 * `--repo <path>`: specify path to repository, defaults to current directory
 * `--tag <name>`: name of the tag to create, defaults to `v{version}`
+* `--api <APIKEY>`: use Github API to create the tag, defaults to using Git with
+  ssh credentials from the user running realease

@@ -32,7 +32,7 @@ function usage() {
     Options:
     --force          do not complain if we're not currently on master
     --message <msg>  tag message, defaults to 'Release version {version}'
-    --no-push        do not push the tag
+    --no-push        do not push the tag (ignored when using --api)
     --remote <name>  name of remote to push to, defaults to 'origin'
     --repo <path>    specify path to repository, defaults to current directory
     --tag <name>     name of the tag to create, defaults to 'v{version}'
