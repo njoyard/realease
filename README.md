@@ -57,6 +57,13 @@ The way `realease tag` works is that it simply checks if the tag for the current
 version in `package.json` exists. If not, it creates it, pointing to the latest
 commit on master.
 
+> **Note:** calling `realease tag` this way requires that your CI uses a deploy
+> key that is able to push to the repository.  If that's not the case, you can
+> use the GitHub API instead.
+> * Create an API token with `repo` access
+> * Store that token in an environment variable in your CI project settings
+> * Call `realease tag --api $APITOKENVARIABLE` instead
+
 ## Making a release
 
 Run `realease major|minor|patch` from your project repository.  Click on the

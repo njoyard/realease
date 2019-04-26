@@ -8,6 +8,7 @@ const { readFile, writeFile } = require("fs-extra");
 const argparse = require("cli-argparse");
 const semver = require("semver");
 const Git = require("nodegit");
+const Octokit = require("@octokit/rest");
 
 function usage() {
   console.error(`Usage:
@@ -35,6 +36,8 @@ function usage() {
     --remote <name>  name of remote to push to, defaults to 'origin'
     --repo <path>    specify path to repository, defaults to current directory
     --tag <name>     name of the tag to create, defaults to 'v{version}'
+    --api <APIKEY>   use Github API to create the tag, defaults to using Git
+                     with ssh credentials from the user running realease
 `);
 }
 
@@ -181,58 +184,83 @@ async function main() {
   } else if (command === "tag") {
     // Read options
     let tagName = args.options.tag || "v{version}";
+    let apiKey = args.options.api || null;
+
+    // Read version from package.json
+    let { version } = await readPackageJson(pkgFile);
+    let newTag = tagName.replace("{version}", version);
 
     // Open repository
     let { repo } = await openRepo(repoPath, force);
 
-    // Read version from package.json
-    let { version } = await readPackageJson(pkgFile);
-
     // Check if tag exists
-    let newTag = tagName.replace("{version}", version);
     let refs = await tryAsync(
       () => repo.getReferenceNames(Git.Reference.TYPE.LISTALL),
       "getting repo ref names"
     );
 
+    // Get HEAD commit
+    let headCommit = await tryAsync(
+      () => repo.getHeadCommit(),
+      "getting last HEAD commit"
+    );
+
+    // Extract repo org/name
+    let remote = await tryAsync(
+      () => repo.getRemote(remoteName),
+      `getting remote ${remoteName}`
+    );
+    let [, repoOrg, repoName] = remote
+      .url()
+      .match(/([^/:]+)\/([^/]+)(?:.git|\/)$/);
+
     if (refs.indexOf(`refs/tags/${newTag}`) !== -1) {
       console.log(`Tag ${newTag} already exists`);
     } else {
-      // Create release tag
-      let headCommit = await tryAsync(
-        () => repo.getHeadCommit(),
-        "getting last HEAD commit"
-      );
-
       console.log(`Creating tag ${newTag}`);
-      await tryAsync(
-        () =>
-          repo.createTag(
-            headCommit.sha(),
-            newTag,
-            message.replace("{version}", version)
-          ),
-        "creating release tag"
-      );
 
-      // Push to remote
-      if (push) {
-        console.log(`Pushing tag ${newTag} to ${remoteName}`);
-        let remote = await tryAsync(
-          () => repo.getRemote(remoteName),
-          `getting remote ${remoteName}`
-        );
+      if (apiKey) {
+        // Create API helper
+        let ghapi = new Octokit({ auth: `token ${apiKey}` });
+
+        // Create release tag
         await tryAsync(
           () =>
-            remote.push([`refs/tags/${newTag}`], {
-              callbacks: {
-                credentials(url, userName) {
-                  return Git.Cred.sshKeyFromAgent(userName);
-                }
-              }
+            ghapi.git.createRef({
+              owner: repoOrg,
+              repo: repoName,
+              ref: `refs/tags/${newTag}`,
+              sha: headCommit.sha()
             }),
-          "pushing release tag"
+          "creating release tag with github API"
         );
+      } else {
+        // Create release tag
+        await tryAsync(
+          () =>
+            repo.createTag(
+              headCommit.sha(),
+              newTag,
+              message.replace("{version}", version)
+            ),
+          "creating release tag"
+        );
+
+        // Push to remote
+        if (push) {
+          console.log(`Pushing tag ${newTag} to ${remoteName}`);
+          await tryAsync(
+            () =>
+              remote.push([`refs/tags/${newTag}`], {
+                callbacks: {
+                  credentials(url, userName) {
+                    return Git.Cred.sshKeyFromAgent(userName);
+                  }
+                }
+              }),
+            "pushing release tag"
+          );
+        }
       }
     }
   } else {
