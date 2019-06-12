@@ -70,6 +70,12 @@ Run `realease major|minor|patch` from your project repository.  Click on the
 generated link that it outputs to open a new PR, and merge it onto master.  Your
 CI pipeline will tag the commit when it finishes running.
 
+> **Note:** realease needs a SSH agent to authenticate with the git server when
+> pushing a branch.  Please ensure that you have a SSH agent running (you can
+> check that by looking for a `$SSH_AUTH_SOCK` environment variable) and that
+> it knows the SSH key you use to authenticate (on most systems you can add a
+> key using `ssh-add -K /path/to/private/key`).
+
 ## Detailed usage
 
 ### `realease <major|minor|patch>`
