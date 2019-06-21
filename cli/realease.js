@@ -79,6 +79,17 @@ async function readPackageJson(path) {
   );
 }
 
+async function getPackageJsonVersionLine(path) {
+  let lines = (await readFile(path)).toString().split("\n");
+  let versionLines = lines.filter(l => l.match(/"version"\s*:\s*"[^"]+"/));
+
+  if (versionLines.length !== 1) {
+    throw new Error("Cannot find version line in package.json");
+  }
+
+  return lines.indexOf(versionLines[0]) + 1;
+}
+
 async function main() {
   let args = argparse();
 
@@ -193,17 +204,32 @@ async function main() {
     // Open repository
     let { repo } = await openRepo(repoPath, force);
 
-    // Check if tag exists
+    // Read refs
     let refs = await tryAsync(
       () => repo.getReferenceNames(Git.Reference.TYPE.LISTALL),
       "getting repo ref names"
     );
 
-    // Get HEAD commit
-    let headCommit = await tryAsync(
-      () => repo.getHeadCommit(),
-      "getting last HEAD commit"
+    // Get commit that changed package.json version line
+    let versionLine = await tryAsync(
+      () => getPackageJsonVersionLine(pkgFile),
+      "getting version line from package.json"
     );
+
+    let blame = await tryAsync(
+      () => Git.Blame.file(repo, "package.json"),
+      "blaming package.json"
+    );
+
+    let hunk = blame.getHunkByLine(versionLine);
+    if (!hunk) {
+      console.error(
+        "Cannot find blame hunk where package.json changed versions"
+      );
+      process.exit(1);
+    }
+
+    let versionCommit = hunk.finalCommitId();
 
     // Extract repo org/name
     let remote = await tryAsync(
@@ -214,6 +240,7 @@ async function main() {
       .url()
       .match(/([^/:]+)\/([^/]+)(?:.git|\/)$/);
 
+    // Check if tag exists
     if (refs.indexOf(`refs/tags/${newTag}`) !== -1) {
       console.log(`Tag ${newTag} already exists`);
     } else {
@@ -230,7 +257,7 @@ async function main() {
               owner: repoOrg,
               repo: repoName,
               ref: `refs/tags/${newTag}`,
-              sha: headCommit.sha()
+              sha: versionCommit
             }),
           "creating release tag with github API"
         );
@@ -239,7 +266,7 @@ async function main() {
         await tryAsync(
           () =>
             repo.createTag(
-              headCommit.sha(),
+              versionCommit,
               newTag,
               message.replace("{version}", version)
             ),
