@@ -109,3 +109,8 @@ Options:
 * `--tag <name>`: name of the tag to create, defaults to `v{version}`
 * `--api <APIKEY>`: use Github API to create the tag, defaults to using Git with
   ssh credentials from the user running realease
+*  `--release <src>`: alse create a release on Github, requires `--api`. `<src>`
+  specifies the path to a file containing release notes, or may have one of the
+  following values:
+  * `commit`: use the commit message from the tagged commit
+  * `stdin`: read release notes on standard input

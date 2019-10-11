@@ -38,6 +38,12 @@ function usage() {
     --tag <name>     name of the tag to create, defaults to 'v{version}'
     --api <APIKEY>   use Github API to create the tag, defaults to using Git
                      with ssh credentials from the user running realease
+    --release <src>  also create a release on Github, requires '--api'.
+                     <src> specifies the name of a file containing release
+                     notes, or may have one of the following values:
+                       commit: use the commit message from the tagged commit
+                       stdin: read release notes on standard input
+
 `);
 }
 
@@ -196,6 +202,12 @@ async function main() {
     // Read options
     let tagName = args.options.tag || "v{version}";
     let apiKey = args.options.api || null;
+    let release = args.options.release || null;
+
+    if (release && !apiKey) {
+      console.error("Cannot create a release without a github API key");
+      process.exit(1);
+    }
 
     // Read version from package.json
     let { version } = await readPackageJson(pkgFile);
@@ -261,6 +273,39 @@ async function main() {
             }),
           "creating release tag with github API"
         );
+
+        if (release) {
+          let releaseNotes;
+
+          // Read from file 0 in case of stdin
+          if (release === "stdin") release = 0;
+
+          if (release === "commit") {
+            // Lookup the tagged commit
+            let commit = await tryAsync(
+              () => Git.Commit.lookup(repo, versionCommit),
+              "looking up commit with release notes"
+            );
+            releaseNotes = commit.message();
+          } else {
+            // Read from a file
+            releaseNotes = (await tryAsync(
+              () => readFile(release),
+              `reading release notes from ${release}`
+            )).toString();
+          }
+
+          tryAsync(
+            () =>
+              ghapi.git.createRelease({
+                owner: repoOrg,
+                repo: repoName,
+                tag_name: newTag,
+                body: releaseNotes
+              }),
+            "creating release with github API"
+          );
+        }
       } else {
         // Create release tag
         await tryAsync(
