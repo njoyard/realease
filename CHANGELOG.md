@@ -1,5 +1,11 @@
 # Changelog
 
+## Next release
+
+- Add support for signing commits
+- Fix PR url including the `.git` extension in the repo name when remote
+  url has it
+
 ## Version 1.1.1 (2019-10-11)
 
 - Fixed a bug where the remote repository URL was incorrectly parsed when it

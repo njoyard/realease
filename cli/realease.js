@@ -5,10 +5,14 @@
 
 const { resolve } = require("path");
 const { readFile, writeFile } = require("fs-extra");
+const { exec: execAsync } = require("child_process");
+const { promisify } = require("util");
 const argparse = require("cli-argparse");
 const semver = require("semver");
 const Git = require("nodegit");
 const Octokit = require("@octokit/rest");
+
+const exec = promisify(execAsync);
 
 function usage() {
   console.error(`Usage:
@@ -117,6 +121,17 @@ async function main() {
     // Open repository and get current branch
     let { repo, currentBranch } = await openRepo(repoPath, force);
 
+    // Find out if we need to sign commits
+    let config = await tryAsync(
+      () => repo.config(),
+      "reading repository config"
+    )
+
+    let gpgsign = (await tryAsync(
+      () => config.getEntry('commit.gpgsign'),
+      "getting commit.gpgsign value"
+    )).value() === 'true'
+
     // Update version in package.json
     let pkgJson = await readPackageJson(pkgFile);
 
@@ -159,6 +174,16 @@ async function main() {
       "creating release commit"
     );
 
+    if (gpgsign) {
+      // We're resorting to calling git manually here as signing with NodeGit
+      // implies generating the gpg signature ourselves
+      console.log(`Signing release commit`);
+      await tryAsync(
+        () => exec("git commit --amend --no-verify --no-edit", { cwd: repoPath }),
+        "amending the commit with signature"
+      );
+    }
+
     // Push to remote
     if (push) {
       console.log(`Pushing branch ${releaseBranch} to ${remoteName}`);
@@ -180,7 +205,7 @@ async function main() {
 
       let [, repoOrg, repoName] = remote
         .url()
-        .match(/([^/:]+)\/([^/]+)(?:.git|\/)?$/);
+        .match(/([^/:]+)\/([^/]+?)(?:.git|\/)?$/);
 
       console.log(
         `Open the release PR here: https://github.com/${repoOrg}/${repoName}/compare/${releaseBranch}?expand=1`
