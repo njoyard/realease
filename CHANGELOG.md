@@ -1,10 +1,11 @@
 # Changelog
 
-## Next release
+## Version 1.2.0 (2020-07-24)
 
 - Add support for signing commits
 - Fix PR url including the `.git` extension in the repo name when remote
   url has it
+- Update dependencies to fix a security advisory on lodash
 
 ## Version 1.1.1 (2019-10-11)
 
