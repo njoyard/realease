@@ -1,5 +1,9 @@
 # Changelog
 
+## Next release
+
+- Add support for signing commits
+
 ## Version 1.1.1 (2019-10-11)
 
 - Fixed a bug where the remote repository URL was incorrectly parsed when it
