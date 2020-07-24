@@ -3,6 +3,8 @@
 ## Next release
 
 - Add support for signing commits
+- Fix PR url including the `.git` extension in the repo name when remote
+  url has it
 
 ## Version 1.1.1 (2019-10-11)
 

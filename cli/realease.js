@@ -205,7 +205,7 @@ async function main() {
 
       let [, repoOrg, repoName] = remote
         .url()
-        .match(/([^/:]+)\/([^/]+)(?:.git|\/)?$/);
+        .match(/([^/:]+)\/([^/]+?)(?:.git|\/)?$/);
 
       console.log(
         `Open the release PR here: https://github.com/${repoOrg}/${repoName}/compare/${releaseBranch}?expand=1`
