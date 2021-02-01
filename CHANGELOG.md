@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.3.0 (2021-02-01)
+
+- Update dependencies to support node 12
+
 ## Version 1.2.0 (2020-07-24)
 
 - Add support for signing commits
