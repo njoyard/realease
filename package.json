@@ -8,7 +8,7 @@
     "@octokit/rest": "^16.25.0",
     "cli-argparse": "^1.1.2",
     "fs-extra": "^7.0.1",
-    "nodegit": "^0.24.1",
+    "nodegit": "^0.27.0",
     "semver": "^6.0.0"
   },
   "bin": {
