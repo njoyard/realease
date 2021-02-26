@@ -7,11 +7,11 @@ Ease up your releases.
 Realease makes releases of node libs with github a bit easier.  It implements
 the following workflow:
 
-- 1. Update `package.json` with a new version number
-- 2. Create a release branch with a single commit containing the version update
-- 3. Push that branch to github
-- 4. Make a PR from that branch and merge it
-- 5. Tag the resulting commit on master with the version number
+1. Update `package.json` with a new version number
+1. Create a release branch with a single commit containing the version update
+1. Push that branch to github
+1. Make a PR from that branch and merge it
+1. Tag the resulting commit on master with the version number
 
 Steps 1-3 are automated with a single call of realease.
 
