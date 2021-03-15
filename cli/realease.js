@@ -159,10 +159,15 @@ async function main() {
       "checking out release branch"
     );
 
+    // Get signature config
+    let sign = await tryAsync(
+      () => Git.Signature.default(repo),
+      "getting signature info for repository"
+    )
+
     // Create commit on release branch
     let commitMessage = message.replace("{version}", newVersion);
     console.log(`Creating release commit with message ${commitMessage}`);
-    let sign = Git.Signature.default(repo);
     await tryAsync(
       () =>
         repo.createCommitOnHead(
