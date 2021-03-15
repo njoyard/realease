@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.4.0 (2021-03-15)
+
+- Fix a segfault with recent nodegit versions due to passing a promise
+  instead of the value it resolves to
+
 ## Version 1.3.0 (2021-02-01)
 
 - Update dependencies to support node 12
